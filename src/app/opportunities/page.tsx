@@ -3,7 +3,13 @@
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "mantine-react-table/styles.css";
-import React, { ChangeEvent, useMemo, useState } from "react";
+import React, {
+  ChangeEvent,
+  Fragment,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 import {
   MantineReactTable,
   type MRT_ColumnDef,
@@ -34,8 +40,8 @@ import {
   shortLinkAvailability
 } from "@/hooks/opportunities";
 import { validateRequired, validateUrl } from "@/util/dataUtils";
-import { Router } from "next/router";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 function validateOpportunity(
   opportunity: OpportunityResponse,
@@ -61,6 +67,7 @@ function validateOpportunity(
 }
 
 const OpportunitiesPage = () => {
+  const { userType, isLoading } = useAuth();
   const [fileInModal, setFileInModal] = React.useState<File>();
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
@@ -317,25 +324,29 @@ const OpportunitiesPage = () => {
     ),
     renderRowActions: ({ row, table }) => (
       <Flex gap="md">
-        <Tooltip label="Edit">
-          <ActionIcon
-            variant="subtle"
-            size="sm"
-            onClick={() => table.setEditingRow(row)}
-          >
-            <IconEdit />
-          </ActionIcon>
-        </Tooltip>
-        <Tooltip label="Delete">
-          <ActionIcon
-            variant="subtle"
-            size="sm"
-            color="red"
-            onClick={() => openDeleteConfirmModal(row)}
-          >
-            <IconTrash />
-          </ActionIcon>
-        </Tooltip>
+        {["ADMIN_MC", "ADMIN_LC"].includes(userType ? userType : "MEMBER") && (
+          <Fragment>
+            <Tooltip label="Edit">
+              <ActionIcon
+                variant="subtle"
+                size="sm"
+                onClick={() => table.setEditingRow(row)}
+              >
+                <IconEdit />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Delete">
+              <ActionIcon
+                variant="subtle"
+                size="sm"
+                color="red"
+                onClick={() => openDeleteConfirmModal(row)}
+              >
+                <IconTrash />
+              </ActionIcon>
+            </Tooltip>
+          </Fragment>
+        )}
         <Tooltip label="View">
           <ActionIcon
             variant="subtle"
@@ -347,6 +358,7 @@ const OpportunitiesPage = () => {
         </Tooltip>
       </Flex>
     ),
+
     state: {
       isLoading: isLoadingOpportunities,
       isSaving:
