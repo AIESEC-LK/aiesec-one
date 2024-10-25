@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
   const redirect_uri = cookies().get("redirect_uri")?.value
     ? cookies().get("redirect_uri")?.value!
-    : `${process.env.NEXT_PUBLIC_BASE_URL}/`;
+    : `${process.env.NEXTAUTH_URL}/`;
   console.log("Redirect URI:", redirect_uri);
 
   const response = NextResponse.redirect(redirect_uri, { status: 302 });
