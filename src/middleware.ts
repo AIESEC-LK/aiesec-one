@@ -16,6 +16,7 @@ import authService from "./services/auth.service";
 
 export async function middleware(request: NextRequest) {
   const lastUrl = `${process.env.BASE_URL}${request.nextUrl.pathname}`;
+  //unnecessary code
   //   if (lastUrl == `${process.env.BASE_URL}/`) {
   //     const url = new URL(`${process.env.BASE_URL}`);
   //     return NextResponse.redirect(url.toString());
