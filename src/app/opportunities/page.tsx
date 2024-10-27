@@ -102,7 +102,9 @@ const OpportunitiesPage = () => {
           type: "text",
           required: true,
           error: validationErrors?.title
-        }
+        },
+        size: 150,
+        maxSize: 175
       },
       {
         accessorKey: "description",
@@ -117,7 +119,9 @@ const OpportunitiesPage = () => {
               ...validationErrors,
               description: undefined
             })
-        }
+        },
+        size: 250,
+        mazSize: 280
       },
       {
         accessorKey: "originalUrl",
@@ -141,6 +145,11 @@ const OpportunitiesPage = () => {
         header: "Opportunity Link",
         enableClickToCopy: true,
         mantineEditTextInputProps: ({ cell, column, row, table }) => {
+          const initialShortLink = String(cell.getValue())?.replace(
+            "https://one.aiesec.lk/opp/",
+            ""
+          );
+
           return {
             type: "text",
             inputWrapperOrder: ["label", "input", "error", "description"],
@@ -156,20 +165,23 @@ const OpportunitiesPage = () => {
                 }}
               >
                 <IconLink size={16} /> https://one.aiesec.lk/opp/
-                {shortLinkInModal}
+                {shortLinkInModal || initialShortLink}
               </span>
             ),
             required: true,
             error: validationErrors?.shortLink,
+            value: shortLinkInModal || initialShortLink,
             onChange: (event: ChangeEvent<HTMLInputElement>) => {
-              checkShortLinkAvailability(event.target.value);
-              setShortLinkInModal(event.target.value);
+              const newShortLink = event.target.value;
+              setShortLinkInModal(newShortLink);
+
+              // Only check availability if the short link has changed
+              if (newShortLink !== initialShortLink) {
+                checkShortLinkAvailability(newShortLink);
+              }
             },
             onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                url: undefined
-              })
+              setValidationErrors({ ...validationErrors, url: undefined })
           };
         }
       },
