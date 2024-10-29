@@ -67,7 +67,11 @@ function useUpdateOpportunity() {
         title: opportunity.title,
         description: opportunity.description,
         originalUrl: opportunity.originalUrl,
-        shortLink: SHORT_LINK_PREFIXES.OPPORTUNITIES + opportunity.shortLink,
+        shortLink:
+          opportunity.shortLink &&
+          (opportunity.shortLink.startsWith("https://one.aiesec.lk/opp/")
+            ? opportunity.shortLink
+            : "https://one.aiesec.lk/opp/".concat(opportunity.shortLink)),
         deadline: opportunity.deadline
       };
       formData.append("data", JSON.stringify(resourceData));
