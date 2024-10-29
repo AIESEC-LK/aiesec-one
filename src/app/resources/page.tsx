@@ -122,11 +122,17 @@ const ResourcesPage = () => {
                   fontWeight: 600,
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 8
+                  gap: 8,
+                  maxWidth: "100%", 
+                  overflow: "visible", 
+                  whiteSpace: "normal", 
+                  wordWrap: "break-word", 
                 }}
               >
-                <IconLink size={16} /> https://one.aiesec.lk/r/
-                {shortLinkInModal}
+                <IconLink size={16} /> 
+                <span style={{ flexShrink: 1, overflowWrap: "break-word" }}>
+                  https://one.aiesec.lk/r/ {shortLinkInModal}
+                </span>
               </span>
             ),
             required: true,
@@ -242,13 +248,14 @@ const ResourcesPage = () => {
     getRowId: (row) => row._id,
     mantineToolbarAlertBannerProps: isLoadingResourcesError
       ? {
-          color: "red",
-          children: "Error loading data"
-        }
+        color: "red",
+        children: "Error loading data"
+      }
       : undefined,
     mantineTableContainerProps: {
       style: {
-        minHeight: "500px"
+        minHeight: "500px",
+        overflowX: "auto"
       }
     },
     onCreatingRowCancel: () => resetInputs(),
@@ -307,17 +314,22 @@ const ResourcesPage = () => {
   return (
     <div className={classes.body}>
       <Box
-        my={20}
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between"
-        }}
+        className={classes.box}
       >
-        <Title mt={8} mb={24} order={1} style={{ color: "#1C7ED6" }}>
+        <Title
+          className={classes.title} 
+          mt={8} 
+          mb={20} 
+          ml={15} 
+          order={1} 
+          style={{ 
+            color: "#1C7ED6" 
+          }}
+        >
           Resources
         </Title>
         <Button
+          className={classes.button}
           onClick={() => {
             table.setCreatingRow(true);
           }}
