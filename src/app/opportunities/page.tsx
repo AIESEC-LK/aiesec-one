@@ -42,6 +42,7 @@ import {
 import { validateRequired, validateUrl } from "@/util/dataUtils";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import debounce from "lodash/debounce";
 
 function validateOpportunity(
   opportunity: OpportunityResponse,
@@ -67,7 +68,7 @@ function validateOpportunity(
 }
 
 const OpportunitiesPage = () => {
-  const { userType, isLoading } = useAuth();
+  const { userType, officeId, isLoading } = useAuth();
   const [fileInModal, setFileInModal] = React.useState<File>();
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
@@ -99,6 +100,10 @@ const OpportunitiesPage = () => {
         console.error(error);
       });
   };
+
+  const debouncedCheckAvailability = debounce((newShortLink: string) => {
+    checkShortLinkAvailability(newShortLink);
+  }, 2000);
 
   const columns = useMemo<MRT_ColumnDef<OpportunityResponse>[]>(
     () => [
@@ -169,16 +174,14 @@ const OpportunitiesPage = () => {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
-                  maxWidth: "100%", 
-                  overflow: "visible", 
-                  whiteSpace: "normal", 
-                  wordWrap: "break-word", 
+                  maxWidth: "100%",
+                  overflow: "visible",
+                  whiteSpace: "normal",
+                  wordWrap: "break-word"
                 }}
               >
-
                 <IconLink size={16} /> https://one.aiesec.lk/opp/
                 {shortLinkInModal || initialShortLink}
-
               </span>
             ),
             required: true,
@@ -190,7 +193,7 @@ const OpportunitiesPage = () => {
 
               // Only check availability if the short link has changed
               if (newShortLink !== initialShortLink) {
-                checkShortLinkAvailability(newShortLink);
+                debouncedCheckAvailability(newShortLink);
               }
             },
             onFocus: () =>
@@ -308,9 +311,9 @@ const OpportunitiesPage = () => {
     getRowId: (row) => row._id,
     mantineToolbarAlertBannerProps: isLoadingOpportunitiesError
       ? {
-        color: "red",
-        children: "Error loading data"
-      }
+          color: "red",
+          children: "Error loading data"
+        }
       : undefined,
     mantineTableContainerProps: {
       style: {
@@ -409,7 +412,7 @@ const OpportunitiesPage = () => {
         </Button>
       </Box>
       <div style={{ overflowX: "auto", width: "100%" }}>
-        <MantineReactTable table={table}  />
+        <MantineReactTable table={table} />
       </div>
     </div>
   );

@@ -6,4 +6,5 @@ export type ResourceRequest = {
   shortLink: string;
   functions: string;
   keywords: string;
+  officeId: string;
 };

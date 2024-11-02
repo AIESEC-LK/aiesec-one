@@ -6,13 +6,19 @@ import {
   QUERY_KEYS,
   SHORT_LINK_PREFIXES
 } from "@/lib/constants";
+import { useAuth } from "./useAuth";
 
 function useCreateResource() {
+  const { officeId, isLoading } = useAuth();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (resource: ResourceRequest) => {
+      if (isLoading || !officeId) {
+        throw new Error("Office ID not yet available");
+      }
       console.log(resource);
       resource.shortLink = SHORT_LINK_PREFIXES.RESOURCES + resource.shortLink;
+      resource.officeId = officeId;
       const response = await fetch(API_ENDPOINTS.RESOURCES, {
         method: "POST",
         headers: {
@@ -31,15 +37,28 @@ function useCreateResource() {
 }
 
 function useGetResources() {
+  const { officeId, isLoading } = useAuth();
   return useQuery<ResourceResponse[]>({
     queryKey: [QUERY_KEYS.RESOURCES],
     queryFn: async () => {
-      const response = await fetch(API_ENDPOINTS.RESOURCES);
+      if (isLoading) {
+        return { data: [], isLoading: true };
+      }
+      if (!officeId) {
+        throw new Error("officeId is not defined");
+      }
+      const response = await fetch(
+        `${API_ENDPOINTS.RESOURCES}?officeId=${officeId}`,
+        {
+          method: "GET"
+        }
+      );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       return (await response.json()).data;
     },
+    enabled: !!officeId,
     refetchOnWindowFocus: false
   });
 }

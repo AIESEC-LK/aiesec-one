@@ -4,10 +4,11 @@ import { environment } from "../config/env.config";
 
 const generateAccessToken = async (
   userId: string,
-  userType: string
+  userType: string,
+  officeId: string
 ): Promise<string> => {
   const secret = new TextEncoder().encode(environment.accessTokenSecret);
-  const token = await new SignJWT({ userId, userType })
+  const token = await new SignJWT({ userId, userType, officeId })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime(environment.accessTokenExpiration)
     .sign(secret);
@@ -19,9 +20,9 @@ const verifyAccessToken = async (token: string) => {
   try {
     const secret = new TextEncoder().encode(environment.accessTokenSecret);
     const {
-      payload: { userType }
+      payload: { userType, officeId }
     } = await jwtVerify(token, secret);
-    return userType;
+    return { userType, officeId };
   } catch (error) {
     if (error instanceof errors.JWTExpired) {
       return { decodedToken: null, error: "expired" };

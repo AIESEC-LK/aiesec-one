@@ -10,16 +10,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "No session found" }, { status: 401 });
     }
 
-    const userType = await authService.verifyAccessToken(session);
+    const response = await authService.verifyAccessToken(session);
 
-    if (!userType) {
+    if (!response) {
       return NextResponse.json(
         { error: "Invalid session, try again" },
         { status: 401 }
       );
     }
-
-    return NextResponse.json({ userType: userType });
+    return NextResponse.json({
+      userType: response.userType,
+      officeId: response.officeId
+    });
   } catch (error) {
     console.error("Session verification error:", error);
     return NextResponse.json(

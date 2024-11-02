@@ -275,9 +275,9 @@ export async function getAccessibleEntitiesWithNames(): Promise<
   );
 }
 
-export async function getCurrentPersonUserRole() {
-  let role = "MEMBER";
-  let personId = "";
+export async function getCurrentPersonDetails() {
+  let role = "";
+  let officeId = "";
   let isValidOffice = false;
 
   const query = gql`
@@ -306,10 +306,9 @@ export async function getCurrentPersonUserRole() {
 
   console.log(queryResponse.currentPerson);
 
-  personId = queryResponse.currentPerson.id;
+  const personId = queryResponse.currentPerson.id;
   for (const position of queryResponse.currentPerson.current_positions) {
     if (VALID_OFFICE_IDS.includes(position.office.id)) {
-      console.log(position.office.id);
       isValidOffice = true;
       break;
     }
@@ -322,12 +321,18 @@ export async function getCurrentPersonUserRole() {
   for (const position of queryResponse.currentPerson.current_positions) {
     if (ADMIN_MC.includes(position.role.name)) {
       role = "ADMIN_MC";
+      officeId = position.office.id;
       break;
     }
     if (ADMIN_LC.includes(position.role.name) && role !== "ADMIN_MC") {
       role = "ADMIN_LC";
+      officeId = position.office.id;
+      break;
+    } else {
+      role = "MEMBER";
+      officeId = position.office.id;
     }
   }
 
-  return { role, personId };
+  return { role, personId, officeId };
 }

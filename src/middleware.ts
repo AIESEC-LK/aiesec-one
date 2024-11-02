@@ -8,8 +8,7 @@ import {
 } from "./app/api/auth/auth-utils";
 import { GetTokenResponse } from "./app/api/auth/auth-types";
 import {
-  getCurrentPersonUserRole,
-  getPersonId,
+  getCurrentPersonDetails,
   isPersonIdPresent
 } from "./util/person-utils";
 import authService from "./services/auth.service";
@@ -80,10 +79,11 @@ export async function middleware(request: NextRequest) {
     if (!isPersonIdPresent()) {
       console.log("SESSION");
       // const personId = await getPersonId(getAccessToken());
-      const { role, personId } = await getCurrentPersonUserRole();
+      const { role, personId, officeId } = await getCurrentPersonDetails();
       const sessionToken = await authService.generateAccessToken(
         personId.toString(),
-        role
+        role,
+        officeId
       );
 
       response.cookies.set("session", sessionToken, {
@@ -93,14 +93,15 @@ export async function middleware(request: NextRequest) {
       });
     }
   } else {
-    const userType = (await authService.verifyAccessToken(session)) as string;
+    const result = await authService.verifyAccessToken(session);
 
-    if (!userType) {
+    if (!result) {
       response.cookies.delete("session");
-      const { role, personId } = await getCurrentPersonUserRole();
+      const { role, personId, officeId } = await getCurrentPersonDetails();
       const sessionToken = await authService.generateAccessToken(
         personId.toString(),
-        role
+        role,
+        officeId
       );
 
       response.cookies.set("session", sessionToken, {
@@ -110,7 +111,7 @@ export async function middleware(request: NextRequest) {
       });
     }
 
-    response.headers.set("x-user-type", userType);
+    response.headers.set("x-user-type", result.userType as string);
   }
 
   return response;
@@ -126,6 +127,6 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    "/((?!api|auth|_next/static|_next/image|favicon.ico).*)"
+    "/((?!api|auth|_next/static|_next/image|favicon.ico|opp/).*)"
   ]
 };

@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
   let opportunities;
 
   const shortLink = req.nextUrl.searchParams.get("shortLink");
+  const officeId = req.nextUrl.searchParams.get("officeId");
 
   try {
     const db = (await clientPromise).db();
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
     } else {
       opportunities = await db
         .collection(COLLECTIONS.OPPORTUNITIES)
-        .find({})
+        .find({ officeId: officeId })
         .toArray();
 
       return successResponse(
@@ -101,7 +102,8 @@ export async function POST(req: Request) {
       coverImageUrl: opportunityRequest?.coverImage
         ? await uploadFileToR2(file, uniqueId)
         : null,
-      deadline: opportunityRequest.deadline
+      deadline: opportunityRequest.deadline,
+      officeId: opportunityRequest.officeId
     });
 
     const result = await db

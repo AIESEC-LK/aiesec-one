@@ -33,6 +33,7 @@ import {
   useUpdateResource
 } from "@/hooks/resources";
 import { validateRequired, validateUrl } from "@/util/dataUtils";
+import { useAuth } from "@/hooks/useAuth";
 
 function validateResource(resource: ResourceResponse) {
   return {
@@ -54,6 +55,7 @@ function validateResource(resource: ResourceResponse) {
 }
 
 const ResourcesPage = () => {
+  const { userType } = useAuth();
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
@@ -123,13 +125,13 @@ const ResourcesPage = () => {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 8,
-                  maxWidth: "100%", 
-                  overflow: "visible", 
-                  whiteSpace: "normal", 
-                  wordWrap: "break-word", 
+                  maxWidth: "100%",
+                  overflow: "visible",
+                  whiteSpace: "normal",
+                  wordWrap: "break-word"
                 }}
               >
-                <IconLink size={16} /> 
+                <IconLink size={16} />
                 <span style={{ flexShrink: 1, overflowWrap: "break-word" }}>
                   https://one.aiesec.lk/r/ {shortLinkInModal}
                 </span>
@@ -246,11 +248,13 @@ const ResourcesPage = () => {
     editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
     getRowId: (row) => row._id,
+    enableRowActions: false,
+
     mantineToolbarAlertBannerProps: isLoadingResourcesError
       ? {
-        color: "red",
-        children: "Error loading data"
-      }
+          color: "red",
+          children: "Error loading data"
+        }
       : undefined,
     mantineTableContainerProps: {
       style: {
@@ -263,6 +267,7 @@ const ResourcesPage = () => {
     onEditingRowCancel: () => resetInputs(),
     onEditingRowSave: handleEditResource,
     positionActionsColumn: "last",
+
     renderCreateRowModalContent: ({ table, row, internalEditComponents }) => (
       <Stack>
         <Title order={3}>Create Resource</Title>
@@ -281,29 +286,37 @@ const ResourcesPage = () => {
         </Flex>
       </Stack>
     ),
-    renderRowActions: ({ row, table }) => (
-      <Flex gap="md">
-        <Tooltip label="Edit">
-          <ActionIcon
-            variant="subtle"
-            size="sm"
-            onClick={() => table.setEditingRow(row)}
-          >
-            <IconEdit />
-          </ActionIcon>
-        </Tooltip>
-        <Tooltip label="Delete">
-          <ActionIcon
-            variant="subtle"
-            size="sm"
-            color="red"
-            onClick={() => openDeleteConfirmModal(row)}
-          >
-            <IconTrash />
-          </ActionIcon>
-        </Tooltip>
-      </Flex>
-    ),
+    renderRowActions: ({ row, table }) => {
+      return (
+        <Flex gap="md">
+          {["ADMIN_MC", "ADMIN_LC"].includes(
+            userType ? userType : "MEMBER"
+          ) && (
+            <>
+              <Tooltip label="Edit">
+                <ActionIcon
+                  variant="subtle"
+                  size="sm"
+                  onClick={() => table.setEditingRow(row)}
+                >
+                  <IconEdit />
+                </ActionIcon>
+              </Tooltip>
+              <Tooltip label="Delete">
+                <ActionIcon
+                  variant="subtle"
+                  size="sm"
+                  color="red"
+                  onClick={() => openDeleteConfirmModal(row)}
+                >
+                  <IconTrash />
+                </ActionIcon>
+              </Tooltip>
+            </>
+          )}
+        </Flex>
+      );
+    },
     state: {
       isLoading: isLoadingResources,
       isSaving: isCreatingResource || isUpdatingResource || isDeletingResource,
@@ -313,17 +326,15 @@ const ResourcesPage = () => {
 
   return (
     <div className={classes.body}>
-      <Box
-        className={classes.box}
-      >
+      <Box className={classes.box}>
         <Title
-          className={classes.title} 
-          mt={8} 
-          mb={20} 
-          ml={15} 
-          order={1} 
-          style={{ 
-            color: "#1C7ED6" 
+          className={classes.title}
+          mt={8}
+          mb={20}
+          ml={15}
+          order={1}
+          style={{
+            color: "#1C7ED6"
           }}
         >
           Resources

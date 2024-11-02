@@ -7,14 +7,19 @@ import {
   successResponse
 } from "@/util/apiUtils";
 import { ResourceRequest } from "@/types/ResourceRequest";
+import { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const officeId = req.nextUrl.searchParams.get("officeId");
+  console.log("OFFICE ID 🎃", officeId);
   try {
     const db = (await clientPromise).db();
 
     const resources = await db
       .collection(COLLECTIONS.RESOURCES)
-      .find({})
+      .find({
+        officeId: officeId
+      })
       .toArray();
 
     return successResponse(SUCCESS_MESSAGES.RESOURCES_FETCHED, resources);
@@ -26,7 +31,6 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const resourceRequest: ResourceRequest = await req.json();
-  console.log("Resource request: ", resourceRequest);
 
   try {
     const db = (await clientPromise).db();
@@ -37,7 +41,8 @@ export async function POST(req: Request) {
       originalUrl: resourceRequest.originalUrl,
       shortLink: resourceRequest.shortLink,
       functions: resourceRequest.functions.split(","),
-      keywords: resourceRequest.keywords.split(",")
+      keywords: resourceRequest.keywords.split(","),
+      officeId: resourceRequest.officeId
     });
 
     const result = await db
