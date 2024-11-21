@@ -43,6 +43,7 @@ import { validateRequired, validateUrl } from "@/util/dataUtils";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import debounce from "lodash/debounce";
+import { USER_TYPE } from "@/constants/common.constants";
 
 function validateOpportunity(
   opportunity: OpportunityResponse,
@@ -345,8 +346,9 @@ const OpportunitiesPage = () => {
       </Stack>
     ),
     renderRowActions: ({ row, table }) => (
-      <Flex gap="md">
-        {["ADMIN_MC", "ADMIN_LC"].includes(userType ? userType : "MEMBER") && (
+      <Flex gap="md" justify="center">
+        {(USER_TYPE.ADMIN_MC === userType ||
+          row.original.officeId === officeId) && (
           <Fragment>
             <Tooltip label="Edit">
               <ActionIcon

@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
 
   const shortLink = req.nextUrl.searchParams.get("shortLink");
   const officeId = req.nextUrl.searchParams.get("officeId");
+  const defaultOfficeId = "1623";
 
   try {
     const db = (await clientPromise).db();
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest) {
     } else {
       opportunities = await db
         .collection(COLLECTIONS.OPPORTUNITIES)
-        .find({ officeId: officeId })
+        .find({ officeId: { $in: [officeId, defaultOfficeId] } })
         .toArray();
 
       return successResponse(

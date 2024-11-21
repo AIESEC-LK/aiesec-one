@@ -6,4 +6,5 @@ export type OpportunityResponse = {
   shortLink: string;
   coverImageUrl: string;
   deadline: string;
+  officeId: string;
 };
