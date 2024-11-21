@@ -30,19 +30,19 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: Request) {
-  const resourceRequest: ResourceRequest = await req.json();
+  const { resource, officeId } = await req.json();
 
   try {
     const db = (await clientPromise).db();
 
     const newResource = new Resource({
-      title: resourceRequest.title,
-      description: resourceRequest.description,
-      originalUrl: resourceRequest.originalUrl,
-      shortLink: resourceRequest.shortLink,
-      functions: resourceRequest.functions.split(","),
-      keywords: resourceRequest.keywords.split(","),
-      officeId: resourceRequest.officeId
+      title: resource.title,
+      description: resource.description,
+      originalUrl: resource.originalUrl,
+      shortLink: resource.shortLink,
+      functions: resource.functions.split(","),
+      keywords: resource.keywords.split(","),
+      officeId: officeId
     });
 
     const result = await db
