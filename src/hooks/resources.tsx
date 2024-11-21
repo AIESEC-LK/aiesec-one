@@ -18,13 +18,12 @@ function useCreateResource() {
       }
       console.log(resource);
       resource.shortLink = SHORT_LINK_PREFIXES.RESOURCES + resource.shortLink;
-      resource.officeId = officeId;
       const response = await fetch(API_ENDPOINTS.RESOURCES, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(resource)
+        body: JSON.stringify({ ...resource, officeId: officeId })
       });
       if (!response.ok) {
         throw new Error("Network response was not ok");
