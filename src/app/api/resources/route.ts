@@ -43,8 +43,8 @@ export async function POST(req: Request) {
       description: resource.description,
       originalUrl: resource.originalUrl,
       shortLink: resource.shortLink,
-      functions: resource.functions.split(","),
-      keywords: resource.keywords.split(","),
+      functions: resource.functions,
+      keywords: resource.keywords,
       officeId: officeId
     });
 
