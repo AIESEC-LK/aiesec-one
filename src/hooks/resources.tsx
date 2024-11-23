@@ -23,7 +23,7 @@ function useCreateResource() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ ...resource, officeId: officeId })
+        body: JSON.stringify({ resource, officeId: officeId })
       });
       if (!response.ok) {
         throw new Error("Network response was not ok");

@@ -76,8 +76,8 @@ export async function PUT(
           description: resourceRequest.description,
           originalUrl: resourceRequest.originalUrl,
           shortLink: resourceRequest.shortLink,
-          functions: resourceRequest.functions.split(","),
-          keywords: resourceRequest.keywords.split(",")
+          functions: resourceRequest.functions,
+          keywords: resourceRequest.keywords
         }
       }
     );

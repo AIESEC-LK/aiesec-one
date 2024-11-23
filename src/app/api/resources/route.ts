@@ -30,7 +30,10 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: Request) {
-  const { resource, officeId } = await req.json();
+  const { resource, officeId } = (await req.json()) as {
+    resource: ResourceRequest;
+    officeId: string;
+  };
 
   try {
     const db = (await clientPromise).db();
