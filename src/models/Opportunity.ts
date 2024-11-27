@@ -21,6 +21,10 @@ const opportunitySchema = new Schema({
   deadline: {
     type: String,
     required: true
+  },
+  officeId: {
+    type: String,
+    required: true
   }
 });
 

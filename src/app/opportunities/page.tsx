@@ -3,7 +3,13 @@
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "mantine-react-table/styles.css";
-import React, { ChangeEvent, useMemo, useState } from "react";
+import React, {
+  ChangeEvent,
+  Fragment,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 import {
   MantineReactTable,
   type MRT_ColumnDef,
@@ -34,8 +40,10 @@ import {
   shortLinkAvailability
 } from "@/hooks/opportunities";
 import { validateRequired, validateUrl } from "@/util/dataUtils";
-import { Router } from "next/router";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import debounce from "lodash/debounce";
+import { USER_TYPE } from "@/constants/common.constants";
 
 function validateOpportunity(
   opportunity: OpportunityResponse,
@@ -61,6 +69,7 @@ function validateOpportunity(
 }
 
 const OpportunitiesPage = () => {
+  const { userType, officeId, isLoading } = useAuth();
   const [fileInModal, setFileInModal] = React.useState<File>();
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
@@ -93,6 +102,10 @@ const OpportunitiesPage = () => {
       });
   };
 
+  const debouncedCheckAvailability = debounce((newShortLink: string) => {
+    checkShortLinkAvailability(newShortLink);
+  }, 2000);
+
   const columns = useMemo<MRT_ColumnDef<OpportunityResponse>[]>(
     () => [
       {
@@ -102,7 +115,9 @@ const OpportunitiesPage = () => {
           type: "text",
           required: true,
           error: validationErrors?.title
-        }
+        },
+        size: 150,
+        maxSize: 175
       },
       {
         accessorKey: "description",
@@ -117,7 +132,9 @@ const OpportunitiesPage = () => {
               ...validationErrors,
               description: undefined
             })
-        }
+        },
+        size: 250,
+        mazSize: 280
       },
       {
         accessorKey: "originalUrl",
@@ -141,6 +158,11 @@ const OpportunitiesPage = () => {
         header: "Opportunity Link",
         enableClickToCopy: true,
         mantineEditTextInputProps: ({ cell, column, row, table }) => {
+          const initialShortLink = String(cell.getValue())?.replace(
+            "https://one.aiesec.lk/opp/",
+            ""
+          );
+
           return {
             type: "text",
             inputWrapperOrder: ["label", "input", "error", "description"],
@@ -152,24 +174,31 @@ const OpportunitiesPage = () => {
                   fontWeight: 600,
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 8
+                  gap: 8,
+                  maxWidth: "100%",
+                  overflow: "visible",
+                  whiteSpace: "normal",
+                  wordWrap: "break-word"
                 }}
               >
                 <IconLink size={16} /> https://one.aiesec.lk/opp/
-                {shortLinkInModal}
+                {shortLinkInModal || initialShortLink}
               </span>
             ),
             required: true,
             error: validationErrors?.shortLink,
+            value: shortLinkInModal || initialShortLink,
             onChange: (event: ChangeEvent<HTMLInputElement>) => {
-              checkShortLinkAvailability(event.target.value);
-              setShortLinkInModal(event.target.value);
+              const newShortLink = event.target.value;
+              setShortLinkInModal(newShortLink);
+
+              // Only check availability if the short link has changed
+              if (newShortLink !== initialShortLink) {
+                debouncedCheckAvailability(newShortLink);
+              }
             },
             onFocus: () =>
-              setValidationErrors({
-                ...validationErrors,
-                url: undefined
-              })
+              setValidationErrors({ ...validationErrors, url: undefined })
           };
         }
       },
@@ -289,7 +318,8 @@ const OpportunitiesPage = () => {
       : undefined,
     mantineTableContainerProps: {
       style: {
-        minHeight: "500px"
+        minHeight: "500px",
+        overflowX: "auto"
       }
     },
     onCreatingRowCancel: resetInputs,
@@ -316,26 +346,31 @@ const OpportunitiesPage = () => {
       </Stack>
     ),
     renderRowActions: ({ row, table }) => (
-      <Flex gap="md">
-        <Tooltip label="Edit">
-          <ActionIcon
-            variant="subtle"
-            size="sm"
-            onClick={() => table.setEditingRow(row)}
-          >
-            <IconEdit />
-          </ActionIcon>
-        </Tooltip>
-        <Tooltip label="Delete">
-          <ActionIcon
-            variant="subtle"
-            size="sm"
-            color="red"
-            onClick={() => openDeleteConfirmModal(row)}
-          >
-            <IconTrash />
-          </ActionIcon>
-        </Tooltip>
+      <Flex gap="md" justify="center">
+        {(USER_TYPE.ADMIN_MC === userType ||
+          row.original.officeId === officeId) && (
+          <Fragment>
+            <Tooltip label="Edit">
+              <ActionIcon
+                variant="subtle"
+                size="sm"
+                onClick={() => table.setEditingRow(row)}
+              >
+                <IconEdit />
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label="Delete">
+              <ActionIcon
+                variant="subtle"
+                size="sm"
+                color="red"
+                onClick={() => openDeleteConfirmModal(row)}
+              >
+                <IconTrash />
+              </ActionIcon>
+            </Tooltip>
+          </Fragment>
+        )}
         <Tooltip label="View">
           <ActionIcon
             variant="subtle"
@@ -347,6 +382,7 @@ const OpportunitiesPage = () => {
         </Tooltip>
       </Flex>
     ),
+
     state: {
       isLoading: isLoadingOpportunities,
       isSaving:
@@ -357,18 +393,19 @@ const OpportunitiesPage = () => {
 
   return (
     <div className={classes.body}>
-      <Box
-        my={20}
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between"
-        }}
-      >
-        <Title mt={8} mb={24} order={1} style={{ color: "#1C7ED6" }}>
+      <Box className={classes.box}>
+        <Title
+          className={classes.title}
+          mt={8}
+          mb={20}
+          ml={15}
+          order={1}
+          style={{ color: "#1C7ED6" }}
+        >
           Opportunities
         </Title>
         <Button
+          className={classes.button}
           onClick={() => {
             table.setCreatingRow(true);
           }}
@@ -376,7 +413,7 @@ const OpportunitiesPage = () => {
           Create Opportunity
         </Button>
       </Box>
-      <div>
+      <div style={{ overflowX: "auto", width: "100%" }}>
         <MantineReactTable table={table} />
       </div>
     </div>

@@ -5,16 +5,15 @@ import { AppShell } from "@mantine/core";
 import { useSession } from "next-auth/react";
 import Loading from "@/app/loading";
 import "mantine-react-table/styles.css";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function MainAppShell({
   children
 }: Readonly<{ children: React.ReactNode }>) {
-  const { status } = useSession();
-
-  if (status === "loading") return <Loading />;
-
+  const { isAuthenticated, isLoading } = useAuth();
   // Private pages with sidebar (for authenticated users)
-  if (status === "authenticated")
+  if (isLoading) return <Loading />;
+  if (isAuthenticated) {
     return (
       <AppShell>
         <AppShell.Navbar>
@@ -37,6 +36,7 @@ export default function MainAppShell({
         </AppShell.Footer>
       </AppShell>
     );
+  }
 
   // Public pages (for unauthenticated users)
   return children;

@@ -20,6 +20,10 @@ const resourceSchema = new Schema({
   },
   keywords: {
     type: Array<String>
+  },
+  officeId: {
+    type: String,
+    required: true
   }
 });
 

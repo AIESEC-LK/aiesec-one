@@ -7,18 +7,24 @@ import {
   SHORT_LINK_PREFIXES
 } from "@/lib/constants";
 import { ResourceResponse } from "@/types/ResourceResponse";
+import { useAuth } from "./useAuth";
 
 function useCreateOpportunity() {
+  const { officeId, isLoading } = useAuth();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (opportunity: OpportunityRequest) => {
+      if (isLoading || !officeId) {
+        throw new Error("Office ID not yet available");
+      }
       const formData = new FormData();
       const resourceData = {
         title: opportunity.title,
         description: opportunity.description,
         originalUrl: opportunity.originalUrl,
         shortLink: SHORT_LINK_PREFIXES.OPPORTUNITIES + opportunity.shortLink,
-        deadline: opportunity.deadline
+        deadline: opportunity.deadline,
+        officeId: officeId
       };
       formData.append("data", JSON.stringify(resourceData));
       if (opportunity.coverImage) {
@@ -41,19 +47,32 @@ function useCreateOpportunity() {
 }
 
 function useGetOpportunities() {
+  const { officeId, isLoading } = useAuth();
+
   return useQuery<OpportunityResponse[]>({
-    queryKey: [QUERY_KEYS.OPPORTUNITIES],
+    queryKey: [QUERY_KEYS.OPPORTUNITIES, officeId],
     queryFn: async () => {
-      const response = await fetch(API_ENDPOINTS.OPPORTUNITIES, {
-        method: "GET"
-      });
+      if (isLoading) {
+        return { data: [], isLoading: true };
+      }
+
+      if (!officeId) {
+        throw new Error("officeId is not defined");
+      }
+
+      const response = await fetch(
+        `${API_ENDPOINTS.OPPORTUNITIES}?officeId=${officeId}`,
+        {
+          method: "GET"
+        }
+      );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       const responseData = await response.json();
-
       return responseData.data;
     },
+    enabled: !!officeId,
     refetchOnWindowFocus: false
   });
 }
@@ -67,7 +86,11 @@ function useUpdateOpportunity() {
         title: opportunity.title,
         description: opportunity.description,
         originalUrl: opportunity.originalUrl,
-        shortLink: SHORT_LINK_PREFIXES.OPPORTUNITIES + opportunity.shortLink,
+        shortLink:
+          opportunity.shortLink &&
+          (opportunity.shortLink.startsWith("https://one.aiesec.lk/opp/")
+            ? opportunity.shortLink
+            : "https://one.aiesec.lk/opp/".concat(opportunity.shortLink)),
         deadline: opportunity.deadline
       };
       formData.append("data", JSON.stringify(resourceData));

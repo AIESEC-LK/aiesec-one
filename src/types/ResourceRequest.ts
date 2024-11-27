@@ -4,6 +4,6 @@ export type ResourceRequest = {
   description: string;
   originalUrl: string;
   shortLink: string;
-  functions: string;
-  keywords: string;
+  functions: string[];
+  keywords: string[];
 };

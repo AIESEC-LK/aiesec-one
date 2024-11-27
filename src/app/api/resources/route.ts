@@ -7,14 +7,19 @@ import {
   successResponse
 } from "@/util/apiUtils";
 import { ResourceRequest } from "@/types/ResourceRequest";
+import { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const officeId = req.nextUrl.searchParams.get("officeId");
+  console.log("OFFICE ID 🎃", officeId);
   try {
     const db = (await clientPromise).db();
 
     const resources = await db
       .collection(COLLECTIONS.RESOURCES)
-      .find({})
+      .find({
+        officeId: officeId
+      })
       .toArray();
 
     return successResponse(SUCCESS_MESSAGES.RESOURCES_FETCHED, resources);
@@ -25,19 +30,22 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const resourceRequest: ResourceRequest = await req.json();
-  console.log("Resource request: ", resourceRequest);
+  const { resource, officeId } = (await req.json()) as {
+    resource: ResourceRequest;
+    officeId: string;
+  };
 
   try {
     const db = (await clientPromise).db();
 
     const newResource = new Resource({
-      title: resourceRequest.title,
-      description: resourceRequest.description,
-      originalUrl: resourceRequest.originalUrl,
-      shortLink: resourceRequest.shortLink,
-      functions: resourceRequest.functions.split(","),
-      keywords: resourceRequest.keywords.split(",")
+      title: resource.title,
+      description: resource.description,
+      originalUrl: resource.originalUrl,
+      shortLink: resource.shortLink,
+      functions: resource.functions,
+      keywords: resource.keywords,
+      officeId: officeId
     });
 
     const result = await db
