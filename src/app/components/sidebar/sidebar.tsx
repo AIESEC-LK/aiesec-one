@@ -57,6 +57,15 @@ export default function Sidebar() {
   const [active, setActive] = useState<number | null>(null);
   const router = useRouter();
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth", { method: "POST" });
+    } catch (error) {
+      console.error("Failed to delete session cookie");
+    }
+    window.location.href = "https://auth.aiesec.org/users/sign_out";
+  };
+
   const links = sidebarData.map((link, index) => (
     <NavbarLink
       {...link}
@@ -109,9 +118,7 @@ export default function Sidebar() {
         <NavbarLink
           icon={IconLogout}
           label="Logout"
-          onClick={() =>
-            signOut({ callbackUrl: `${window.location.origin}/login` })
-          }
+          onClick={() => handleLogout()}
         />
       </Stack>
     </nav>

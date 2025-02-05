@@ -26,3 +26,18 @@ export async function GET(request: NextRequest) {
 
   return response;
 }
+
+export async function POST(request: NextRequest) {
+  console.log("Deleting cookies 🍪");
+  const cookieStore = cookies();
+
+  cookieStore.delete("session");
+  cookieStore.delete("access_token");
+  cookieStore.delete("refresh_token");
+  cookieStore.delete("redirect_uri");
+
+  return NextResponse.json({
+    success: true,
+    message: "Cookies deleted successfully"
+  });
+}
