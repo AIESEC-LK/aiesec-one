@@ -48,8 +48,7 @@ function NavbarLink({ icon: Icon, label, active, onClick }: NavbarLinkProps) {
 const sidebarData = [
   { icon: IconHome, label: "Home", link: "/" },
   { icon: IconSparkles, label: "Opportunities", link: "/opportunities" },
-  { icon: IconLinkPlus, label: "Resources", link: "/resources" },
-  { icon: IconUsersGroup, label: "Members", link: "/members" }
+  { icon: IconLinkPlus, label: "Resources", link: "/resources" }
 ];
 
 export default function Sidebar() {
