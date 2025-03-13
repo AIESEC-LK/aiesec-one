@@ -3,7 +3,7 @@ import { UserType } from "@/types/auth";
 import { USER_TYPE } from "@/constants/common.constants";
 
 export function useAuth() {
-  const [userType, setUserType] = useState<UserType>(USER_TYPE.MEMBER);
+  const [userType, setUserType] = useState<UserType | null>(null);
   const [officeId, setOfficeId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
